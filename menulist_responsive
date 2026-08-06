@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Responsive UI"),
+        ),
+
+
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text(
+                  "Menu",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                  ),
+                ),
+              ),
+
+              ListTile(
+                leading: Icon(Icons.home),
+                title: Text("Home"),
+              ),
+
+              ListTile(
+                leading: Icon(Icons.message),
+                title: Text("Messages"),
+              ),
+
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text("Photos"),
+              ),
+            ],
+          ),
+        ),
+
+        body: Center(
+          child: width < 600
+              ? Column(
+                  children: [
+                    Expanded(
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1580582932707-520aed937b7b',
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                )
+              : width < 900
+                  ? Column(
+                      children: [
+                        Expanded(
+                          child: Image.network(
+                            'https://images.unsplash.com/photo-1580582932707-520aed937b7b',
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: Image.network(
+                            'https://images.unsplash.com/photo-1580582932707-520aed937b7b',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                    ),
+        ),
+      ),
+    );
+  }
+}
