@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const StudentScreen(),
+    );
+  }
+}
+
+class StudentScreen extends StatelessWidget {
+  const StudentScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Student Information"),
+        backgroundColor: Colors.pink,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          StudentCard(
+            name: "Praharshitha",
+            branch: "Computer Science",
+            cgpa: "9.2",
+          ),
+          StudentCard(
+            name: "Samantha",
+            branch: "Electronics",
+            cgpa: "8.9",
+          ),
+          StudentCard(
+            name: "Shruthi",
+            branch: "Mechanical",
+            cgpa: "8.5",
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Same Custom Widget for every student
+class StudentCard extends StatelessWidget {
+  final String name;
+  final String branch;
+  final String cgpa;
+
+  const StudentCard({
+    super.key,
+    required this.name,
+    required this.branch,
+    required this.cgpa,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // SAME ICON for every student
+            const Icon(
+              Icons.person,
+              size: 50,
+              color: Colors.pink,
+            ),
+
+            const SizedBox(width: 20),
+
+            // SAME layout for every student
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text("Branch: $branch"),
+                Text("CGPA: $cgpa"),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
