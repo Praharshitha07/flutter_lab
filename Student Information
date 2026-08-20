@@ -16,8 +16,48 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class StudentScreen extends StatelessWidget {
+class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
+
+  @override
+  State<StudentScreen> createState() => _StudentScreenState();
+}
+
+class _StudentScreenState extends State<StudentScreen> {
+  // Controllers
+  final nameController = TextEditingController();
+  final branchController = TextEditingController();
+  final cgpaController = TextEditingController();
+
+  // Student list
+  final List<Map<String, String>> students = [];
+
+  void addStudent() {
+    if (nameController.text.isNotEmpty &&
+        branchController.text.isNotEmpty &&
+        cgpaController.text.isNotEmpty) {
+      setState(() {
+        students.add({
+          "name": nameController.text,
+          "branch": branchController.text,
+          "cgpa": cgpaController.text,
+        });
+      });
+
+      // Clear text fields after adding
+      nameController.clear();
+      branchController.clear();
+      cgpaController.clear();
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    branchController.dispose();
+    cgpaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,31 +66,89 @@ class StudentScreen extends StatelessWidget {
         title: const Text("Student Information"),
         backgroundColor: Colors.pink,
       ),
-      body: ListView(
+
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: const [
-          StudentCard(
-            name: "Praharshitha",
-            branch: "Computer Science",
-            cgpa: "9.2",
-          ),
-          StudentCard(
-            name: "Samantha",
-            branch: "Electronics",
-            cgpa: "8.9",
-          ),
-          StudentCard(
-            name: "Shruthi",
-            branch: "Mechanical",
-            cgpa: "8.5",
-          ),
-        ],
+        child: Column(
+          children: [
+            // Student Name
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: "Student Name",
+                prefixIcon: Icon(
+                  Icons.person,
+                  color: Colors.pink,
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Branch
+            TextField(
+              controller: branchController,
+              decoration: const InputDecoration(
+                labelText: "Branch",
+                prefixIcon: Icon(
+                  Icons.school,
+                  color: Colors.pink,
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // CGPA
+            TextField(
+              controller: cgpaController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "CGPA",
+                prefixIcon: Icon(
+                  Icons.grade,
+                  color: Colors.pink,
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Add button
+            ElevatedButton.icon(
+              onPressed: addStudent,
+              icon: const Icon(Icons.add),
+              label: const Text("Add Student"),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Display students
+            Expanded(
+              child: ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) {
+                  final student = students[index];
+
+                  return StudentCard(
+                    name: student["name"]!,
+                    branch: student["branch"]!,
+                    cgpa: student["cgpa"]!,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// Same Custom Widget for every student
+// Custom Widget
 class StudentCard extends StatelessWidget {
   final String name;
   final String branch;
@@ -72,7 +170,6 @@ class StudentCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // SAME ICON for every student
             const Icon(
               Icons.person,
               size: 50,
@@ -81,20 +178,55 @@ class StudentCard extends StatelessWidget {
 
             const SizedBox(width: 20),
 
-            // SAME layout for every student
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                // Name with icon
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person,
+                      size: 20,
+                      color: Colors.pink,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 5),
-                Text("Branch: $branch"),
-                Text("CGPA: $cgpa"),
+
+                // Branch with icon
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.school,
+                      size: 18,
+                      color: Colors.pink,
+                    ),
+                    const SizedBox(width: 8),
+                    Text("Branch: $branch"),
+                  ],
+                ),
+
+                // CGPA with icon
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.grade,
+                      size: 18,
+                      color: Colors.pink,
+                    ),
+                    const SizedBox(width: 8),
+                    Text("CGPA: $cgpa"),
+                  ],
+                ),
               ],
             ),
           ],
