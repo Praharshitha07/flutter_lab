@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const AnimationPage(),
+    );
+  }
+}
+
+class AnimationPage extends StatefulWidget {
+  const AnimationPage({super.key});
+
+  @override
+  State<AnimationPage> createState() => _AnimationPageState();
+}
+
+class _AnimationPageState extends State<AnimationPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+
+    animation = Tween<double>(
+      begin: 80,
+      end: 250,
+    ).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  void startAnimation() {
+    controller.reset();
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.deepPurple[50],
+
+      appBar: AppBar(
+        title: const Text(
+          'Animation Framework',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            
+            AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                return Container(
+                  width: animation.value,
+                  height: animation.value,
+                  color: Colors.deepPurple,
+                );
+              },
+            ),
+
+            const SizedBox(height: 40),
+
+            ElevatedButton(
+              onPressed: startAnimation,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Play Animation'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
