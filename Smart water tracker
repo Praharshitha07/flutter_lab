@@ -1,0 +1,370 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  runApp(const WaterApp());
+}
+
+class WaterApp extends StatelessWidget {
+  const WaterApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Water Tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xffEAF7FF),
+      ),
+      home: const WaterTracker(),
+    );
+  }
+}
+
+class WaterTracker extends StatefulWidget {
+  const WaterTracker({super.key});
+
+  @override
+  State<WaterTracker> createState() => _WaterTrackerState();
+}
+
+class _WaterTrackerState extends State<WaterTracker> {
+  final TextEditingController controller = TextEditingController();
+
+  int total = 0;
+  int entries = 0;
+  final int goal = 2000;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      total = prefs.getInt('total') ?? 0;
+      entries = prefs.getInt('entries') ?? 0;
+    });
+  }
+
+  Future<void> saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setInt('total', total);
+    await prefs.setInt('entries', entries);
+  }
+
+  void addWater() {
+    int? amount = int.tryParse(controller.text);
+
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('💧 Please enter a value greater than 0'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      total += amount;
+      entries++;
+    });
+
+    saveData();
+    controller.clear();
+  }
+
+  void resetWater() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('💧 Reset Intake?'),
+          content: const Text(
+            'Are you sure you want to reset today\'s water intake?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  total = 0;
+                  entries = 0;
+                });
+
+                saveData();
+                Navigator.pop(context);
+              },
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int remaining = goal - total;
+
+    if (remaining < 0) {
+      remaining = 0;
+    }
+
+    double percentage = (total / goal) * 100;
+
+    if (percentage > 100) {
+      percentage = 100;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.water_drop),
+            SizedBox(width: 8),
+            Text('Smart Water Tracker'),
+          ],
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+
+        child: Column(
+          children: [
+            const SizedBox(height: 15),
+
+            // Water Icon
+            const Icon(
+              Icons.water_drop,
+              size: 80,
+              color: Colors.blue,
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'Stay Hydrated! 💧',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            // Daily Goal Card
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.local_drink,
+                      size: 35,
+                      color: Colors.lightBlue,
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    const Text(
+                      'Daily Goal',
+                      style: TextStyle(fontSize: 18),
+                    ),
+
+                    Text(
+                      '$goal mL',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Total Consumed
+            Card(
+              color: Colors.blue,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.water_drop,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      '$total mL',
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const Text(
+                      'Total Consumed',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Progress
+            LinearProgressIndicator(
+              value: percentage / 100,
+              minHeight: 14,
+              backgroundColor: Colors.blue.shade100,
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(10),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              '💧 ${percentage.toStringAsFixed(0)}% Completed',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              '💦 $remaining mL Remaining',
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.orange,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              '🥤 Entries Today: $entries',
+              style: const TextStyle(fontSize: 18),
+            ),
+
+            const SizedBox(height: 25),
+
+            // Input
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Enter water amount',
+                hintText: 'Example: 250 mL',
+                prefixIcon: const Icon(
+                  Icons.water_drop,
+                  color: Colors.blue,
+                ),
+                suffixText: 'mL',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // Add Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: addWater,
+                icon: const Icon(Icons.add),
+                label: const Text(
+                  'Add Water',
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Reset Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                onPressed: resetWater,
+                icon: const Icon(Icons.refresh),
+                label: const Text(
+                  'Reset Today',
+                  style: TextStyle(fontSize: 17),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  side: const BorderSide(color: Colors.blue),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              'Drink water • Stay healthy • Stay hydrated 💧',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.blueGrey,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
